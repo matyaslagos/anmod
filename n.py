@@ -152,13 +152,14 @@ def sent_prob(sentence, n, model):
     return prob
 
 # -----
-# Should we have multiple sentence-end markers? (Tentatively: no)
+# Should we have multiple sentence-end markers? (Tentatively: no.)
 # -----
 
-def lim_strings(letters, n, strings=[], prev_strings=[[]]):
+# Generates list of all letter sequences (as lists) up to n over letters:
+def strings_upto(letters, n, strings=[], prev_strings=[[]]):
     if n == 0:
         return strings
     else:
         new_strings = [[letter] + prev_string for letter in letters
                                               for prev_string in prev_strings]
-        return lim_strings(letters, n-1, strings + new_strings, new_strings)
+        return strings_upto(letters, n-1, strings + new_strings, new_strings)
