@@ -2,6 +2,7 @@
 # Anmod 1: N-gram models #
 # ====================== #
 
+import itertools
 import math
 import random
 import nltk
@@ -85,7 +86,7 @@ def freq_dict(corpus):
     return freq_dy
 
 # -----
-# Training the models
+# Auxiliary functions for model building
 # -----
 
 # Computes list of n-grams of sentence:
@@ -105,7 +106,7 @@ def ngrams_list(sentence, n):
     sentence = (n-1) * ['<s>',] + sentence + ['</s>',]
     return list(zip(*(sentence[i:len(sentence)-n+i+1] for i in range(n))))
 
-def ctxt_dict(corpus, n):
+def ctxt_dict_upto(corpus, n):
     cdy = {}
     for sentence in corpus:
         for ngram in ngrams_list(sentence, n):
@@ -119,7 +120,7 @@ def ctxt_dict(corpus, n):
                     cdy.update({ctxt: {goal: 1}})
     return cdy
 
-def ctxt_strict(corpus, n):
+def ctxt_dict(corpus, n):
     cdy = {}
     for sentence in corpus:
         for ngram in ngrams_list(sentence, n):
@@ -131,24 +132,53 @@ def ctxt_strict(corpus, n):
                 cdy.update({ctxt: {goal: 1}})
     return cdy
 
-def model(corpus, n):
-    cdy = ctxt_strict(corpus, n)
+# -----
+# Model building
+# -----
+
+def mle_model(corpus, n):
+    cdy = ctxt_dict(corpus, n)
     pdy = {}
     for ctxt in cdy:
         ctxt_freq = sum(cdy[ctxt].values())
         for goal in cdy[ctxt]:
             ctxt_goal_freq = cdy[ctxt][goal]
             pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
-    return pdy
+    return {'pdy': pdy, 'order': n}
 
-def sent_prob(sentence, n, model):
+def lid_model(corpus, n, k=0.05):
+    cdy = ctxt_dict(corpus, n)
+    vocab_size = len(set(itertools.chain(*(cdy[ctxt].keys() for ctxt in cdy))))
+    pdy = {}
+    ctxt_freq_dy = {}
+    for ctxt in cdy:
+        ctxt_freq = sum(cdy[ctxt].values()) + (k * vocab_size)
+        ctxt_freq_dy[ctxt] = 'dont know'
+        for goal in cdy[ctxt]:
+            ctxt_goal_freq = cdy[ctxt][goal] + k
+            pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
+    return {'pdy': pdy, 'order': n, 'add_pm': k}
+
+def mle_prob(sentence, model):
+    pdy, n = model['pdy'], model['order']
+    ngrams = ngrams_list(sentence, n)
+    prob = 1
+    for ngram in ngrams:
+        try:
+            prob *= pdy[ngram]
+        except KeyError:
+            return 0
+    return prob
+
+def lid_prob(sentence, model):
+    pdy, n, k = model['pdy'], model['order'], model['add_pm']
     ngrams = ngrams_list(sentence, n)
     prob = 1
     for ngram in ngrams:
         try:
             prob *= model[ngram]
         except KeyError:
-            return 0
+            prob *= k / pdy[ngram[:-1]]
     return prob
 
 # -----
