@@ -89,7 +89,7 @@ def freq_dict(corpus):
 # -----
 
 # Computes list of n-grams of sentence:
-def ngrams(sentence, n):
+def ngrams_list(sentence, n):
     """Compute list of n-grams (n-tuples of words) of sentence (list of words).
     
     (Attaches appropriate number of sentence-markers at beginning and end.)
@@ -102,19 +102,63 @@ def ngrams(sentence, n):
         - list (of tuples of strings), e.g.:
           [('<s>', 'i'), ('i', 'am'), ('am', 'cool'), ('cool', '</s>')]
     """
-    sentence = ('<s>',) * (n-1) + sentence + ('</s>',) * (n-1)
+    sentence = (n-1) * ['<s>',] + sentence + ['</s>',]
     return list(zip(*(sentence[i:len(sentence)-n+i+1] for i in range(n))))
 
 def ctxt_dict(corpus, n):
     cdy = {}
     for sentence in corpus:
-        for ngram in ngrams(sentence):
+        for ngram in ngrams_list(sentence, n):
             goal = ngram[-1:]
             for i in range(len(ngram)-1):
                 ctxt = ngram[i:-1]
                 try:
                     value_or_zero = cdy[ctxt].setdefault(goal, 0)
-                    cdy[ctxt].update({word: value_or_zero + 1})
+                    cdy[ctxt].update({goal: value_or_zero + 1})
                 except KeyError:
                     cdy.update({ctxt: {goal: 1}})
     return cdy
+
+def ctxt_strict(corpus, n):
+    cdy = {}
+    for sentence in corpus:
+        for ngram in ngrams_list(sentence, n):
+            ctxt, goal = ngram[:-1], ngram[-1:]
+            try:
+                value_or_zero = cdy[ctxt].setdefault(goal, 0)
+                cdy[ctxt].update({goal: value_or_zero + 1})
+            except KeyError:
+                cdy.update({ctxt: {goal: 1}})
+    return cdy
+
+def model(corpus, n):
+    cdy = ctxt_strict(corpus, n)
+    pdy = {}
+    for ctxt in cdy:
+        ctxt_freq = sum(cdy[ctxt].values())
+        for goal in cdy[ctxt]:
+            ctxt_goal_freq = cdy[ctxt][goal]
+            pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
+    return pdy
+
+def sent_prob(sentence, n, model):
+    ngrams = ngrams_list(sentence, n)
+    prob = 1
+    for ngram in ngrams:
+        try:
+            prob *= model[ngram]
+        except KeyError:
+            return 0
+    return prob
+
+# -----
+# Should we have multiple sentence-end markers? (Tentatively: no)
+# -----
+
+def lim_strings(letters, n, strings=[], prev_strings=[[]]):
+    if n == 0:
+        return strings
+    else:
+        new_strings = [[letter] + prev_string for letter in letters
+                                              for prev_string in prev_strings]
+        return lim_strings(letters, n-1, strings + new_strings, new_strings)
