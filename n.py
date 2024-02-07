@@ -103,7 +103,7 @@ def ngrams_list(sentence, n):
         - list (of tuples of strings), e.g.:
           [('<s>', 'i'), ('i', 'am'), ('am', 'cool'), ('cool', '</s>')]
     """
-    sentence = (n-1) * ['<s>',] + sentence + ['</s>',]
+    sentence = ['<s>'] * (n-1) + sentence + ['</s>']
     return list(zip(*(sentence[i:len(sentence)-n+i+1] for i in range(n))))
 
 def ctxt_dict_upto(corpus, n):
@@ -111,7 +111,7 @@ def ctxt_dict_upto(corpus, n):
     for sentence in corpus:
         for ngram in ngrams_list(sentence, n):
             goal = ngram[-1:]
-            for i in range(len(ngram)-1):
+            for i in range(len(ngram)):
                 ctxt = ngram[i:-1]
                 try:
                     value_or_zero = cdy[ctxt].setdefault(goal, 0)
@@ -137,14 +137,14 @@ def ctxt_dict(corpus, n):
 # -----
 
 # Maximum likelihood estimate
-def mle_model(corpus, n=2):
+def mle_model(corpus, n):
     cdy = ctxt_dict(corpus, n)
     pdy = {}
     for ctxt in cdy:
         ctxt_freq = sum(cdy[ctxt].values())
         for goal in cdy[ctxt]:
-            ctxt_goal_freq = cdy[ctxt][goal]
-            pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
+            ngram_freq = cdy[ctxt][goal]
+            pdy[ctxt + goal] = ngram_freq / ctxt_freq
     return {'pdy': pdy, 'order': n}
 
 def mle_prob(sentence, model):
@@ -159,7 +159,7 @@ def mle_prob(sentence, model):
     return prob
 
 # Lidstone ("add-k") smoothing
-def lid_model(corpus, n=2, k=0.05):
+def lid_model(corpus, n, k):
     cdy = ctxt_dict(corpus, n)
     vocab_size = len(set(itertools.chain(*(cdy[ctxt].keys() for ctxt in cdy))))
     pdy = {}
@@ -187,16 +187,34 @@ def lid_prob(sentence, model):
     return prob
 
 # Baseline interpolation
-def bip_model(corpus, n=2, lambdas=(0.75, 0.25)):
+def bip_model(corpus, n, weights):
     cdy = ctxt_dict_upto(corpus, n)
     pdy = {}
-    
+    for ctxt in cdy:
+        ctxt_freq = sum(cdy[ctxt].values())
+        for goal in cdy[ctxt]:
+            ngram_freq = cdy[ctxt][goal]
+            pdy[ctxt + goal] = ngram_freq / ctxt_freq
+    return {'pdy': pdy, 'order': n, 'weights': weights}
+
+def bip_prob(sentence, model):
+    pdy, n, weights = model['pdy'], model['order'], model['weights']
+    ngrams = ngrams_list(sentence, n)
+    prob = 1
+    for ngram in ngrams:
+        prob *= sum(weight * pdy.setdefault(ngram[i:], 0)
+                    for i, weight in enumerate(weights))
+    return prob
+
+# Interpolated Kneser-Ney smoothing
+def kn_model(corpus, n, discount)
 
 # -----
 # Should we have multiple sentence-end markers? (Tentatively: no.)
 # -----
 
-# Generates list of all letter sequences (as lists) up to n over letters:
+# Generates list of all letter sequences (as lists) up to n over letters
+# (for testing whether sequence probabilities sum to 1)
 def strings_upto(letters, n, strings=[], prev_strings=[[]]):
     if n == 0:
         return strings
