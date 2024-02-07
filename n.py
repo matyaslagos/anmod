@@ -136,7 +136,8 @@ def ctxt_dict(corpus, n):
 # Model building
 # -----
 
-def mle_model(corpus, n):
+# Maximum likelihood estimate
+def mle_model(corpus, n=2):
     cdy = ctxt_dict(corpus, n)
     pdy = {}
     for ctxt in cdy:
@@ -145,19 +146,6 @@ def mle_model(corpus, n):
             ctxt_goal_freq = cdy[ctxt][goal]
             pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
     return {'pdy': pdy, 'order': n}
-
-def lid_model(corpus, n, k=0.05):
-    cdy = ctxt_dict(corpus, n)
-    vocab_size = len(set(itertools.chain(*(cdy[ctxt].keys() for ctxt in cdy))))
-    pdy = {}
-    ctxt_freq_dy = {}
-    for ctxt in cdy:
-        ctxt_freq = sum(cdy[ctxt].values()) + (k * vocab_size)
-        ctxt_freq_dy[ctxt] = 'dont know'
-        for goal in cdy[ctxt]:
-            ctxt_goal_freq = cdy[ctxt][goal] + k
-            pdy[ctxt + goal] = ctxt_goal_freq / ctxt_freq
-    return {'pdy': pdy, 'order': n, 'add_pm': k}
 
 def mle_prob(sentence, model):
     pdy, n = model['pdy'], model['order']
@@ -170,16 +158,39 @@ def mle_prob(sentence, model):
             return 0
     return prob
 
+# Lidstone ("add-k") smoothing
+def lid_model(corpus, n=2, k=0.05):
+    cdy = ctxt_dict(corpus, n)
+    vocab_size = len(set(itertools.chain(*(cdy[ctxt].keys() for ctxt in cdy))))
+    pdy = {}
+    ctxt_freqs = {}
+    for ctxt in cdy:
+        ctxt_freq = sum(cdy[ctxt].values()) + (k * vocab_size)
+        ctxt_freqs[ctxt] = ctxt_freq
+        for goal in cdy[ctxt]:
+            ngram_freq = cdy[ctxt][goal] + k
+            pdy[ctxt + goal] = ngram_freq / ctxt_freq
+    return {'pdy': pdy, 'order': n, 'add_param': k,
+            'ctxt_freqs': ctxt_freqs, 'vocab_size': vocab_size}
+
 def lid_prob(sentence, model):
-    pdy, n, k = model['pdy'], model['order'], model['add_pm']
+    pdy, n, k = model['pdy'], model['order'], model['add_param']
+    ctxt_freqs, vocab_size = model['ctxt_freqs'], model['vocab_size']
     ngrams = ngrams_list(sentence, n)
     prob = 1
     for ngram in ngrams:
         try:
-            prob *= model[ngram]
+            prob *= pdy[ngram]
         except KeyError:
-            prob *= k / pdy[ngram[:-1]]
+            ctxt_freq = ctxt_freqs.setdefault(ngram[:-1], k * vocab_size)
+            prob *= k / ctxt_freq
     return prob
+
+# Baseline interpolation
+def bip_model(corpus, n=2, lambdas=(0.75, 0.25)):
+    cdy = ctxt_dict_upto(corpus, n)
+    pdy = {}
+    
 
 # -----
 # Should we have multiple sentence-end markers? (Tentatively: no.)
