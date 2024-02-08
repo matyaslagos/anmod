@@ -52,10 +52,11 @@ def train_test(corpus):
                      if set(sentence).issubset(vocab)]
     return (train, test)
 
-# Computes word frequency dictionary from corpus, where keys are nltk's pos
-# tags and values are lists of (word, freq) pairs, sorted biggest-first by freq:
+# Creates word frequency dictionary from corpus, where keys are nltk's pos
+# tags and values are lists of (word, freq) pairs, sorted biggest-first by freq
+# (with Réka Bandi)
 def freq_dict(corpus):
-    """Sort words from a list of sentences by frequency, per word class.
+    """For each word class, get list of its most-to-least-frequent words.
     
     Argument:
         - corpus (list of lists of strings), e.g.:
@@ -63,7 +64,7 @@ def freq_dict(corpus):
            ['in', 'the', 'garden', 'stood', 'a', 'tree'], ...]
     
     Returns:
-        - dict (of {word class: [(word, freq), ...]} items), e.g.:
+        - dict (of form {word class: [(word, freq), ...]}), e.g.:
           {'DT': [('the', 6770), ('a', 1909), ('all', 412), ...],
            'JJ': [('little', 392), ('good', 203), ('old', 200), ...], ...}
     """
@@ -89,7 +90,7 @@ def freq_dict(corpus):
 # Auxiliary functions for model building
 # -----
 
-# Computes list of n-grams of sentence:
+# Collects n-grams of sentence into a list:
 def ngrams_list(sentence, n):
     """Compute list of n-grams (n-tuples of words) of sentence (list of words).
     
@@ -120,15 +121,18 @@ def ctxt_dict_upto(corpus, n):
                     cdy.update({ctxt: {goal: 1}})
     return cdy
 
+# Creates ngram context dictionary for corpus
 def ctxt_dict(corpus, n):
     cdy = {}
     for sentence in corpus:
         for ngram in ngrams_list(sentence, n):
             ctxt, goal = ngram[:-1], ngram[-1:]
             try:
+                # If ctxt is in cdy, add one to its freq. with goal
                 value_or_zero = cdy[ctxt].setdefault(goal, 0)
                 cdy[ctxt].update({goal: value_or_zero + 1})
             except KeyError:
+                # Else add ctxt to cdy and record this occurrence with goal
                 cdy.update({ctxt: {goal: 1}})
     return cdy
 
@@ -161,13 +165,16 @@ def mle_prob(sentence, model):
 # Lidstone ("add-k") smoothing
 def lid_model(corpus, n, k):
     cdy = ctxt_dict(corpus, n)
+    # Get vocabulary size for later calculating total added frequency to ctxts
     vocab_size = len(set(itertools.chain(*(cdy[ctxt].keys() for ctxt in cdy))))
     pdy = {}
     ctxt_freqs = {}
     for ctxt in cdy:
+        # Add total added freq. to ctxt
         ctxt_freq = sum(cdy[ctxt].values()) + (k * vocab_size)
         ctxt_freqs[ctxt] = ctxt_freq
         for goal in cdy[ctxt]:
+            # Add appropriate freq. to ngram and calculate new ngram probability
             ngram_freq = cdy[ctxt][goal] + k
             pdy[ctxt + goal] = ngram_freq / ctxt_freq
     return {'pdy': pdy, 'order': n, 'add_param': k,
@@ -207,7 +214,8 @@ def bip_prob(sentence, model):
     return prob
 
 # Interpolated Kneser-Ney smoothing
-def kn_model(corpus, n, discount)
+def kn_model(corpus, n, discount):
+    pass
 
 # -----
 # Should we have multiple sentence-end markers? (Tentatively: no.)
