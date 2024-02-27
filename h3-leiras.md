@@ -14,9 +14,30 @@ A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az,
 
 [^1]: Itt nem azt nézzük hogy egy bigram _első_ szavaként hányszor fordult elő `w2`, hanem azt hogy egy bigram _második_ szavaként hányszor fordult elő, mert a `</s>` mondatzáró szimbólumra végződő bigramok valószínűségeit csak így tudjuk megbecsülni.
 
-### Az `itp_model()` függvény leírása
+### A függvények leírása
 
-Az `itp_model()` függvény azt csinálja hogy kiszámolja a tanítóadatban előforduló bigramok empirikus feltételes valószínűségeit és az unigramok empirikus valószínűségeit, és feljegyzi ezeket egy szótárba. Ezt a függvényt kellene megváltoztatni úgy, hogy az unigramoknak ne az empirikus valószínűségeit (azaz normalizált tokengyakoriságait) jegyezze fel, hanem a normalizált típusgyakoriságait. Ehhez kommentekben jelöltem hogy melyik sorokat kell átírni:
+A `txt_import()` függvény stringek listáinak listájaként importál egy txt fájlt, tehát a korpuszunk mondatai mind egy-egy stringlistának fognak megfelelni, pl. így: `['i', 'am', 'reading', 'this']`. Ezt a listát a `train_test()` függvény véletlenszerűen kettészedi 90% tanítóadatra és 10% tesztadatra.
+
+Az `itp_model()` függvény a modell létrehozásához először összegyűjti a `freq_dict` szótárba a `frequencies()` függvénnyel azt hogy:
+
+- a tanítóadatban a kontextusok után milyen szavak fordultak elő hányszor, és hogy
+- a tanítóadatban a szavak előtt milyen kontextusok fordultak elő hányszor
+
+(ez az utóbbi hasznos lesz a modell megváltoztatásához). Így pl.:
+- ha a `freq_dict['fw']['egy']['vízesést']` érték 4 (lent pirossal jelölve), az azt jelenti hogy a `'vízesést'` szó 4-szer fordult elő az `'egy'` kontextus után, és
+- ha a `freq_dict['bw']['reggelt']['jó']` érték 10 (lent kékkel jelölve), az azt jelenti hogy a `'jó'` kontextus 10-szer fordult elő a `'reggelt'` szó előtt.
+![freq_dict](https://github.com/matyaslagos/anmod/assets/47662384/b96ba226-10c4-4d86-8c77-8005019fe5f1)
+
+Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:
+- a tanítóadatban előfordult bigramok empirikus feltételes valószínűségeit (úgy hogy végigmegy a `freq_dict['fw']` szótárban szereplő összes kontextuson) és
+- a tanítóadatban előfordult unigramok empirikus valószínűségeit (úgy hogy végigmegy a `freq_dict['bw']` szótárban szereplő összes szón – ezt azért így csinálja mert így könnyebb lesz átírni hogy ne a szavak tokengyakoriságát nézze a modell hanem a fent meghatározott típusgyakoriságaikat).
+Az így kapott `prob_dict` szótárban a kulcsok az unigramok (stringek) és bigramok (két stringet tartalmazó tuple-ök), az értékeik pedig az empirikus (feltételes) valószínűségeik.
+
+Végül a `perplexity()` függvény kiszámítja az interpolált modell perplexitását (ezt a következő órán fogjuk venni, ez azt méri hogy mennyire lepődik meg a modell tesztadaton, azaz minél kisebb annál jobb) az általunk megadott `bigr_wt`-el súlyozva a bigramvalószínűségeket és `unigram_wt`-el súlyozva az unigramvalószínűségeket – fontos hogy a `bigr_wt` és az `unigram_wt` számok összege 1 legyen (nekem a 0.75 bigram- és a 0.25 unigram-súly jött be a legjobban).
+
+### Az `itp_model()` függvény megváltoztatása
+
+Az `itp_model()` függvényt kellene megváltoztatni úgy, hogy az unigramoknak ne az empirikus valószínűségeit (azaz normalizált tokengyakoriságait) jegyezze fel, hanem a normalizált típusgyakoriságait. Ehhez kommentekben jelöltem hogy melyik sorokat kell átírni:
 
 - a 90. és 91. sorokat (ahol a normalizáló konstanst kapjuk meg, az eredeti modell esetében a bigramok tokengyakoriságainak az összegét), és
 - a 97. sort (ahol az eredeti modell esetében az unigram tokengyakoriságát kapjuk meg – itt az új modellben a típusgyakoriságát kellene megkapnunk).
@@ -48,4 +69,4 @@ Mérjük meg a modell perplexitását a tesztadaton, általunk választott súly
 ```
 h3.perplexity(test_data, model, 0.75, 0.25)
 ```
-(Itt a bigramvalószínűségeket súlyozzuk 0.75-tel és az unigramvalószínűségeket 0.25-tel. Én ezeket a súlyokat találtam a legjobbnak, a modell perplexitása ilyenkor 90 és 95 között lesz.)
+(Itt a bigramvalószínűségeket súlyozzuk 0.75-tel és az unigramvalószínűségeket 0.25-tel.)
