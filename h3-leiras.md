@@ -4,7 +4,7 @@
 Egy alap lineárisan interpolált bigram nyelvmodell egy `w1 w2` bigram feltételes valószínűségét úgy becsüli meg, hogy kiszámolja
 
 - a `w1 w2` bigram empirikus feltételes valószínűségét és
-- a `w2` unigram empirikus valószínűségét[^1],
+- a `w2` unigram empirikus valószínűségét,[^1]
 
 és ennek a két értéknek a súlyozott átlagát veszi, valamilyen általunk kiválasztott súlyokkal. Így ha a `w1 w2` bigram nem fordult elő a tanítóadatban, a modell akkor is tud neki nullánál nagyobb valószínűséget becsülni – és minél gyakoribb a `w2` szó, annál nagyobb valószínűséget kap a `w1 w2` bigram.
 
