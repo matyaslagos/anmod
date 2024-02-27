@@ -26,6 +26,7 @@ Az `itp_model()` függvény a modell létrehozásához először összegyűjti a
 (ez az utóbbi hasznos lesz a modell megváltoztatásához). Így pl.:
 - ha a `freq_dict['fw']['egy']['vízesést']` érték 4 (lent pirossal jelölve), az azt jelenti hogy a `'vízesést'` szó 4-szer fordult elő az `'egy'` kontextus után, és
 - ha a `freq_dict['bw']['reggelt']['jó']` érték 10 (lent kékkel jelölve), az azt jelenti hogy a `'jó'` kontextus 10-szer fordult elő a `'reggelt'` szó előtt.
+
 ![freq_dict](https://github.com/matyaslagos/anmod/assets/47662384/b96ba226-10c4-4d86-8c77-8005019fe5f1)
 
 Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:
