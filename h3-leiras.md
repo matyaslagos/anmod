@@ -10,7 +10,9 @@ Egy alap lineárisan interpolált bigram nyelvmodell egy `w1 w2` bigram feltéte
 
 De lehet hogy egy ennél jobb módszer lenne a valószínűségek becslésére az, ha nem a `w2` szó _tokengyakorisága_ számítana (azaz az hogy összesen hányszor fordult elő egy bigram második szavaként[^1]), hanem a `w2` szó _típusgyakorisága_, azaz az hogy hány _különböző_ bigramban fordult elő második szóként (más szóval hogy hány különböző szó után fordult elő).
 
-A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az, hogy a `h3.py` fájlban az `itp_model()` függvényt írd át úgy hogy a modell a bigramok valószínűségeit a második szavak típusgyakoriságai alapján becsülje meg, és nézd meg hogy így jobb modellt kapunk-e. Fontos hogy ehhez ki kell találni azt is hogy hogyan _normalizáld_ a szavak típusgyakoriságait: ahhoz hogy tényleg valószínűségeket rendeljen a modell a bigramokhoz, meg kell oldani hogy az összes szó "típusvalószínűségeinek" az összege 1 legyen. Ezért valamivel el kell osztani a szavak típusgyakoriságait úgy hogy ez a feltétel teljesüljön, hasonlóan mint ahogy a szavak tokengyakoriságát elosztjuk a tanítóadat méretével ahhoz hogy megkapjuk a "tokenvalószínűségüket" (más néven az empirikus valószínűségüket). (Nem gond ha ezt nem sikerül kitalálni, ezt meg lehet nézni a házi pdf-ének a segítségében.)
+A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az, hogy a [h3.py](h3.py) fájlban az `itp_model()` függvényt írd át úgy hogy a modell a bigramok valószínűségeit a második szavak tokengyakoriságai helyett a típusgyakoriságai alapján becsülje meg, és nézd meg hogy így jobb modellt kapunk-e (lent a "h3.py-ban lévő függvények használata" szekció leírja hogy ezt hogyan lehet megnézni).
+
+Fontos hogy ehhez ki kell találni azt is hogy hogyan _normalizáld_ a szavak típusgyakoriságait: ahhoz hogy tényleg valószínűségeket rendeljen a modell a bigramokhoz, meg kell oldani hogy az összes szó "típusvalószínűségeinek" az összege 1 legyen. Ezért valamivel el kell osztani a szavak típusgyakoriságait úgy hogy ez a feltétel teljesüljön, hasonlóan mint ahogy a szavak tokengyakoriságát elosztjuk a tanítóadat méretével ahhoz hogy megkapjuk a "tokenvalószínűségüket" (más néven az empirikus valószínűségüket). (Nem gond ha ezt nem sikerül kitalálni, ezt meg lehet nézni a házi pdf-ének a segítségében.)
 
 [^1]: Itt nem azt nézzük hogy egy bigram _első_ szavaként hányszor fordult elő `w2`, hanem azt hogy egy bigram _második_ szavaként hányszor fordult elő, mert a `</s>` mondatzáró szimbólumra végződő bigramok valószínűségeit csak így tudjuk megbecsülni.
 
@@ -21,9 +23,9 @@ A `txt_import()` függvény stringek listáinak listájaként importál egy txt 
 Az `itp_model()` függvény a modell létrehozásához először összegyűjti a `freq_dict` szótárba a `frequencies()` függvénnyel azt hogy:
 
 - a tanítóadatban a kontextusok után milyen szavak fordultak elő hányszor, és hogy
-- a tanítóadatban a szavak előtt milyen kontextusok fordultak elő hányszor
+- a tanítóadatban a szavak előtt milyen kontextusok fordultak elő hányszor.
 
-(ez az utóbbi hasznos lesz a modell megváltoztatásához). Így pl.:
+(Ez az utóbbi hasznos lesz a modell megváltoztatásához.) Így pl.:
 - ha a `freq_dict['fw']['egy']['vízesést']` érték 4 (lent pirossal jelölve), az azt jelenti hogy a `'vízesést'` szó 4-szer fordult elő az `'egy'` kontextus után, és
 - ha a `freq_dict['bw']['reggelt']['jó']` érték 10 (lent kékkel jelölve), az azt jelenti hogy a `'jó'` kontextus 10-szer fordult elő a `'reggelt'` szó előtt.
 
