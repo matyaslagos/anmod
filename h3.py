@@ -64,14 +64,14 @@ def itp_model(training_data):
           [['my', 'name', 'is', 'jolán'], ['i', 'am', 'cool'], ..., ['bye']]
     
     Returns:
-        - prob_dict (defaultdict with bigrams and words as keys, and their
+        - prob_dict (dict with bigrams and words as keys, and their
           empirical cond. probabilities as values), e.g.:
           {'king': 0.002987, 'forest': 0.000715,
            ('old', 'king'): 0.075675, ('dark', 'forest'): 0.15, ...}
     """
     freq_dict = frequencies(training_data)
     prob_dict = defaultdict(float)
-    # (1) Obtain bigram empirical conditional probabilities
+    # (1) Obtain empirical conditional probabilities for bigrams
     for context in freq_dict['fw']:
         # (a) Get dict of freqs of words that occurred after context
         next_word_dict = freq_dict['fw'][context]
@@ -86,21 +86,21 @@ def itp_model(training_data):
     # frequencies with which each context occurred before each word)
     total_freq = 0
     for word in freq_dict['bw']:
-        # v--[change!]--v
+        # --v--[change!]--v--
         for context in freq_dict['bw'][word]:
             total_freq += freq_dict['bw'][word][context]
-    # (2/ii) Obtain unigram empirical probabilities
+    # (2/ii) Obtain empirical probabilities for unigrams
     for word in freq_dict['bw']:
         # (a) Get dict of freqs of contexts that occurred before word
         context_dict = freq_dict['bw'][word]
-        # (b) v--[change!]--v Calculate frequency of word
+        # (b) --v--[change!]--v-- Calculate frequency of word
         word_freq = sum(context_dict.values())
         # (c) Record empirical probability of word
         prob_dict[word] = word_freq / total_freq
     return prob_dict
 
 # Calculates the perplexity of model on test data with given weights
-def perplexity(test_data, model, bigr_wt, unigr_wt):
+def perplexity(test_data, model, bi_wt, un_wt):
     """Calculate the perplexity of model on test_data with weights.
     
     Arguments:
@@ -110,14 +110,14 @@ def perplexity(test_data, model, bigr_wt, unigr_wt):
           and their empirical cond. probabilities as values), e.g.:
           {'king': 0.002987, 'forest': 0.000715,
            ('old', 'king'): 0.075675, ('dark', 'forest'): 0.15, ...}
-        - bigr_wt, unigr_wt (floats that sum to 1), e.g.:
+        - bi_wt, un_wt (floats that sum to 1), e.g.:
           0.75, 0.25
     
     Returns:
         - perplexity of model with weights on test_data (float)
     """
     rate = 1 / sum(len(sentence) + 1 for sentence in test_data)
-    cross_entropy = sum(log2(1 / itp_prob(sentence, model, bigr_wt, unigr_wt))
+    cross_entropy = sum(log2(1 / itp_prob(sentence, model, bi_wt, un_wt))
                         for sentence in test_data)
     return exp2(cross_entropy * rate)
 
@@ -140,20 +140,20 @@ def bigrams_list(sentence):
     """
     return list(zip(['<s>'] + sentence, sentence + ['</s>']))
 
-# Records forward and backward cooccurrence frequencies into a dict
+# Records forw. ('fw') and backw. ('bw') cooccurrence frequencies into a dict
 def frequencies(training_data):
-    """Record forward and backward cooccurrence freqs into a dict.
+    """Record forward ('fw') and backward ('bw') cooccurrence freqs into a dict.
     
     Argument:
         - training_data (list of lists of strings), e.g.:
           [['my', 'name', 'is', 'jolán'], ['i', 'am', 'cool'], ..., ['bye']]
     
     Returns:
-        - freq_dict (defaultdict with two subdicts 'fw' and 'bw'), e.g.:
-          > freq_dict['fw']['egy']['vízesést'] == 4 means:
-            'vízesést' occurred 4 times after 'egy', and
-          > freq_dict['bw']['reggelt']['jó'] == 10 means:
-            'jó' occurred 10 times before 'reggelt'
+        - freq_dict (dict with two subdicts 'fw' and 'bw'), e.g.:
+          > freq_dict['fw']['egy']['vízesést'] == 4
+            - means: 'vízesést' occurred 4 times after 'egy', and
+          > freq_dict['bw']['reggelt']['jó'] == 10
+            - means: 'jó' occurred 10 times before 'reggelt'
     """
     freq_dict = {'fw': defaultdict(lambda: defaultdict(int)),
                  'bw': defaultdict(lambda: defaultdict(int))}
@@ -167,17 +167,17 @@ def frequencies(training_data):
     return freq_dict
 
 # Calculates interpolated probability of sentence according to model and weights
-def itp_prob(sentence, model, bigr_wt, unigr_wt):
+def itp_prob(sentence, model, bi_wt, un_wt):
     """Calculate interpolated prob. of sentence acc. to model and weights.
     
     Arguments:
         - sentence (list of strings), e.g.:
           ['my', 'name', 'is', 'jolán']
-        - model (defaultdict with strings and 2-tuples of strings as keys
+        - model (dict with strings and 2-tuples of strings as keys
           and their empirical cond. probabilities as values), e.g.:
           {'king': 0.002987, 'forest': 0.000715,
            ('old', 'king'): 0.075675, ('dark', 'forest'): 0.15, ...}
-        - bigr_wt, unigr_wt (floats that sum to 1), e.g.:
+        - bi_wt, un_wt (floats that sum to 1), e.g.:
           0.75, 0.25
     
     Returns:
@@ -185,7 +185,7 @@ def itp_prob(sentence, model, bigr_wt, unigr_wt):
     """
     prob = 1
     for bigram in bigrams_list(sentence):
-        weighted_bigram_prob  = model[bigram] * bigr_wt
-        weighted_unigram_prob = model[bigram[1]] * unigr_wt
+        weighted_bigram_prob  = model[bigram] * bi_wt
+        weighted_unigram_prob = model[bigram[1]] * un_wt
         prob *= weighted_bigram_prob + weighted_unigram_prob
     return prob
