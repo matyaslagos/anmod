@@ -16,7 +16,7 @@ A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az,
 
 ### A függvények leírása
 
-A `txt_import()` függvény stringek listáinak listájaként importál egy txt fájlt, tehát a korpuszunk mondatai mind egy-egy stringlistának fognak megfelelni, pl. így: `['i', 'am', 'reading', 'this']`. Ezt a listát a `train_test()` függvény véletlenszerűen kettészedi 90% tanítóadatra és 10% tesztadatra.
+A `txt_import()` függvény stringek listáinak listájaként importál egy txt fájlt, tehát a korpuszunk mondatai mind egy-egy stringlistának fognak megfelelni, pl. így: `['i', 'am', 'reading', 'this']`. Ezt a mondatlistát a `train_test()` függvény véletlenszerűen kettészedi 90% tanítóadatra és 10% tesztadatra.
 
 Az `itp_model()` függvény a modell létrehozásához először összegyűjti a `freq_dict` szótárba a `frequencies()` függvénnyel azt hogy:
 
@@ -32,7 +32,10 @@ Az `itp_model()` függvény a modell létrehozásához először összegyűjti a
 Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:
 - a tanítóadatban előfordult bigramok empirikus feltételes valószínűségeit (úgy hogy végigmegy a `freq_dict['fw']` szótárban szereplő összes kontextuson) és
 - a tanítóadatban előfordult unigramok empirikus valószínűségeit (úgy hogy végigmegy a `freq_dict['bw']` szótárban szereplő összes szón – ezt azért így csinálja mert így könnyebb lesz átírni hogy ne a szavak tokengyakoriságát nézze a modell hanem a fent meghatározott típusgyakoriságaikat).
-Az így kapott `prob_dict` szótárban a kulcsok az unigramok (stringek) és bigramok (két stringet tartalmazó tuple-ök), az értékeik pedig az empirikus (feltételes) valószínűségeik.
+
+Az így kapott `prob_dict` szótárban a kulcsok az unigramok (stringek) és bigramok (két stringet tartalmazó tuple-ök), az értékeik pedig az empirikus (feltételes) valószínűségeik. Tehát pl.
+- ha a `prob_dict[('old', 'king')]` értéke 0.075675, az azt jelenti hogy a `'king'` szó 0.075675 valószínűséggel következett az `'old'` kontextus után a tanítóadatban, és
+- ha a `prob_dict['king']` értéke 0.002987, az azt jelenti hogy a `'king'` szó empirikus valószínűsége 0.002987.
 
 Végül a `perplexity()` függvény kiszámítja az interpolált modell perplexitását (ezt a következő órán fogjuk venni, ez azt méri hogy mennyire lepődik meg a modell tesztadaton, azaz minél kisebb annál jobb) az általunk megadott `bigr_wt`-el súlyozva a bigramvalószínűségeket és `unigram_wt`-el súlyozva az unigramvalószínűségeket – fontos hogy a `bigr_wt` és az `unigram_wt` számok összege 1 legyen (nekem a 0.75 bigram- és a 0.25 unigram-súly jött be a legjobban).
 
