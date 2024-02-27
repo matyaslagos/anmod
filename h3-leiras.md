@@ -16,7 +16,7 @@ A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az,
 
 ### Az `itp_model()` függvény leírása
 
-Az `itp_model()` függvény nem csinál mást mint hogy kiszámolja a tanítóadatban előforduló bigramok empirikus feltételes valószínűségeit és az unigramok empirikus valószínűségeit, és feljegyzi ezeket egy szótárba. Ezt a függvényt kellene megváltoztatni úgy, hogy az unigramoknak ne az empirikus valószínűségeit (azaz normalizált tokengyakoriságait) jegyezze fel, hanem a normalizált típusgyakoriságait. Ehhez kommentekben jelöltem hogy melyik sorokat kell átírni:
+Az `itp_model()` függvény azt csinálja hogy kiszámolja a tanítóadatban előforduló bigramok empirikus feltételes valószínűségeit és az unigramok empirikus valószínűségeit, és feljegyzi ezeket egy szótárba. Ezt a függvényt kellene megváltoztatni úgy, hogy az unigramoknak ne az empirikus valószínűségeit (azaz normalizált tokengyakoriságait) jegyezze fel, hanem a normalizált típusgyakoriságait. Ehhez kommentekben jelöltem hogy melyik sorokat kell átírni:
 
 - a 90. és 91. sorokat (ahol a normalizáló konstanst kapjuk meg, az eredeti modell esetében a bigramok tokengyakoriságainak az összegét), és
 - a 97. sort (ahol az eredeti modell esetében az unigram tokengyakoriságát kapjuk meg – itt az új modellben a típusgyakoriságát kellene megkapnunk).
@@ -28,7 +28,7 @@ A megváltoztatott változatot hasznos új függvényként definiálni, pl. `itp
 ### A h3.py-ban lévő függvények használata
 Először töltsük le és helyezzük egy mappába a `h3.py` és a `grimm_full.txt` fájlokat és navigáljunk ebbe a mappába a parancssorban (vagy bármilyen más programozó felületen).
 
-Importáljuk a `h3` modult:
+Miután elindítottuk a Python interpretert, importáljuk a `h3` modult:
 ```
 import h3
 ```
