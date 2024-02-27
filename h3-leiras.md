@@ -29,15 +29,17 @@ Az `itp_model()` függvény a modell létrehozásához először összegyűjti a
 
 ![freq_dict](https://github.com/matyaslagos/anmod/assets/47662384/b96ba226-10c4-4d86-8c77-8005019fe5f1)
 
-Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:
+Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:[^2]
 - a tanítóadatban előfordult bigramok empirikus feltételes valószínűségeit (úgy hogy végigmegy a `freq_dict['fw']` szótárban szereplő összes kontextuson) és
 - a tanítóadatban előfordult unigramok empirikus valószínűségeit (úgy hogy végigmegy a `freq_dict['bw']` szótárban szereplő összes szón – ezt azért így csinálja mert így könnyebb lesz átírni hogy ne a szavak tokengyakoriságát nézze a modell hanem a fent meghatározott típusgyakoriságaikat).
+
+[^2]: (A 73. sor azért a `defaultdict()` függvénnyel inicializálja a `prob_dict()` szótárt, mert így majd a tesztelés közben amikor egy olyan bigram feltételes valószínűségét próbáljuk megkapni ami nem fordult elő a tanítóadatban, akkor automatikusan 0-t kapunk (ha ezt egy sima `dict()` típusú szótárban próbálnánk ugyanígy megnézni akkor hibaüzenetet kapnánk) – de amúgy ugyanúgy működik mint a sima szótárak.)
 
 Az így kapott `prob_dict` szótárban a kulcsok az unigramok (stringek) és bigramok (két stringet tartalmazó tuple-ök), az értékeik pedig az empirikus (feltételes) valószínűségeik. Tehát pl.
 - ha a `prob_dict[('old', 'king')]` értéke 0.075675, az azt jelenti hogy a `'king'` szó 0.075675 valószínűséggel következett az `'old'` kontextus után a tanítóadatban, és
 - ha a `prob_dict['king']` értéke 0.002987, az azt jelenti hogy a `'king'` szó empirikus valószínűsége 0.002987.
 
-Végül a `perplexity()` függvény kiszámítja az interpolált modell perplexitását (ezt a következő órán fogjuk venni, ez azt méri hogy mennyire lepődik meg a modell tesztadaton, azaz minél kisebb annál jobb) az általunk megadott `bigr_wt`-el súlyozva a bigramvalószínűségeket és `unigram_wt`-el súlyozva az unigramvalószínűségeket – fontos hogy a `bigr_wt` és az `unigram_wt` számok összege 1 legyen (nekem a 0.75 bigram- és a 0.25 unigram-súly jött be a legjobban).
+Végül a `perplexity()` függvény kiszámítja az interpolált modell perplexitását (ezt a következő órán fogjuk venni, ez azt méri hogy mennyire lepődik meg a modell tesztadaton, azaz minél kisebb annál jobb) az általunk megadott `bi_wt`-el súlyozva a bigramvalószínűségeket és `un_wt`-el súlyozva az unigramvalószínűségeket – fontos hogy a `bi_wt` és az `un_wt` számok összege 1 legyen (nekem a 0.75 bigram- és a 0.25 unigram-súly jött be a legjobban).
 
 ### Az `itp_model()` függvény megváltoztatása
 
@@ -47,8 +49,6 @@ Az `itp_model()` függvényt kellene megváltoztatni úgy, hogy az unigramoknak 
 - a 97. sort (ahol az eredeti modell esetében az unigram tokengyakoriságát kapjuk meg – itt az új modellben a típusgyakoriságát kellene megkapnunk).
 
 A megváltoztatott változatot hasznos új függvényként definiálni, pl. `itp_type_model()` néven, hogy könnyen össze lehessen hasonlítani a két modellt.
-
-(A 73. sor azért a `defaultdict()` függvénnyel inicializálja a `prob_dict()` szótárt, mert így majd a tesztelés közben amikor egy olyan bigram feltételes valószínűségét próbáljuk megkapni ami nem fordult elő a tanítóadatban, akkor automatikusan 0-t kapunk (ha ezt egy sima `dict()` típusú szótárban próbálnánk ugyanígy megnézni akkor hibaüzenetet kapnánk) – de amúgy ugyanúgy működik mint a sima szótárak.)
 
 ### A h3.py-ban lévő függvények használata
 Először töltsük le és helyezzük egy mappába a `h3.py` és a `grimm_full.txt` fájlokat és navigáljunk ebbe a mappába a parancssorban (vagy bármilyen más programozó felületen).
