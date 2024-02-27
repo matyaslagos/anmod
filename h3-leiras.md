@@ -62,7 +62,7 @@ Osszuk szét véletlenszerűen a korpuszt tanítóadatra és tesztadatra (kb. 90
 ```
 training_data, test_data = h3.train_test(corpus)
 ```
-Építsük meg a modellünket a tanítóadat alapján:
+Hozzuk létre a modellünket a tanítóadat alapján:
 ```
 model = h3.itp_model(training_data)
 ```
