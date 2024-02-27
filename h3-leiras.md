@@ -31,7 +31,7 @@ Az `itp_model()` függvény a modell létrehozásához először összegyűjti a
 
 ![freq_dict](https://github.com/matyaslagos/anmod/assets/47662384/b96ba226-10c4-4d86-8c77-8005019fe5f1)
 
-Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba:[^2]
+Az `itp_model()` függvény ezután a `freq_dict` szótár adatai alapján kiszámolja és összegyűjti a `prob_dict` szótárba a következőket:[^2]
 - a tanítóadatban előfordult bigramok empirikus feltételes valószínűségeit (úgy hogy végigmegy a `freq_dict['fw']` szótárban szereplő összes kontextuson) és
 - a tanítóadatban előfordult unigramok empirikus valószínűségeit (úgy hogy végigmegy a `freq_dict['bw']` szótárban szereplő összes szón – ezt azért így csinálja mert így könnyebb lesz átírni hogy ne a szavak tokengyakoriságát nézze a modell hanem a fent meghatározott típusgyakoriságaikat).
 
