@@ -4,11 +4,11 @@
 Egy alap lineárisan interpolált bigram nyelvmodell egy `w1 w2` bigram feltételes valószínűségét úgy becsüli meg, hogy kiszámolja
 
 - a `w1 w2` bigram empirikus feltételes valószínűségét és
-- a `w2` unigram empirikus valószínűségét,[^1]
+- a `w2` unigram empirikus valószínűségét,
 
 és ennek a két értéknek a súlyozott átlagát veszi, valamilyen általunk kiválasztott súlyokkal. Így ha a `w1 w2` bigram nem fordult elő a tanítóadatban, a modell akkor is tud neki nullánál nagyobb valószínűséget becsülni – és minél gyakoribb a `w2` szó, annál nagyobb valószínűséget kap a `w1 w2` bigram.
 
-De lehet hogy egy ennél jobb módszer lenne a valószínűségek becslésére az, ha nem a `w2` szó _tokengyakorisága_ számítana (azaz az hogy összesen hányszor fordult elő egy bigram második szavaként), hanem a `w2` szó _típusgyakorisága_, azaz az hogy hány _különböző_ bigramban fordult elő második szóként (más szóval hogy hány különböző szó után fordult elő).
+De lehet hogy egy ennél jobb módszer lenne a valószínűségek becslésére az, ha nem a `w2` szó _tokengyakorisága_ számítana (azaz az hogy összesen hányszor fordult elő egy bigram második szavaként[^1]), hanem a `w2` szó _típusgyakorisága_, azaz az hogy hány _különböző_ bigramban fordult elő második szóként (más szóval hogy hány különböző szó után fordult elő).
 
 A szorgalmi feladat (amivel ki lehet váltani a három sima házi feladatot) az, hogy a `h3.py` fájlban az `itp_model()` függvényt írd át úgy hogy a modell a bigramok valószínűségeit a második szavak típusgyakoriságai alapján becsülje meg, és nézd meg hogy így jobb modellt kapunk-e. Fontos hogy ehhez ki kell találni azt is hogy hogyan _normalizáld_ a szavak típusgyakoriságait: ahhoz hogy tényleg valószínűségeket rendeljen a modell a bigramokhoz, meg kell oldani hogy az összes szó "típusvalószínűségeinek" az összege 1 legyen. Ezért valamivel el kell osztani a szavak típusgyakoriságait úgy hogy ez a feltétel teljesüljön, hasonlóan mint ahogy a szavak tokengyakoriságát elosztjuk a tanítóadat méretével ahhoz hogy megkapjuk a "tokenvalószínűségüket" (más néven az empirikus valószínűségüket). (Nem gond ha ezt nem sikerül kitalálni, ezt meg lehet nézni a házi pdf-ének a segítségében.)
 
