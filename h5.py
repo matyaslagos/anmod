@@ -1,4 +1,4 @@
-#from collections import defaultdict
+from collections import defaultdict
 #from math import log2, exp2
 from random import shuffle
 
