@@ -29,8 +29,6 @@ def obs_est(corpus):
     Arguments:
         - corpus (list of lists of words), e.g.:
           [['my', 'name', 'is', 'jolán'], ['i', 'am', 'cool'], ..., ['bye']]
-        - no_unknowns (boolean, True by default): option for filtering out
-          unseen words from the test data
     
     Returns:
         - (obs, est) where obs and est randomly contain 50pct of corpus.
