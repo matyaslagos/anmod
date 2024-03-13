@@ -31,7 +31,7 @@ def obs_est(corpus):
           [['my', 'name', 'is', 'jolán'], ['i', 'am', 'cool'], ..., ['bye']]
     
     Returns:
-        - (obs, est) where obs and est randomly contain 50pct of corpus.
+        - (obs, est) where obs and est both contain random half of corpus.
     """
     sentences = corpus.copy()
     shuffle(sentences)
