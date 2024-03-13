@@ -101,20 +101,19 @@ def itp_model(training_data):
 
 # Calculates the perplexity of model on test data with given weights
 def perplexity(test_data, model, bi_wt, un_wt):
-    """Calculate the perplexity of model on test_data with weights.
+    """Calculate the perplexity of model on test_data with given weights.
     
     Arguments:
         - test_data (list of lists of strings), e.g.:
           [['my', 'name', 'is', 'jolán'], ['i', 'am', 'cool'], ..., ['bye']]
-        - model (defaultdict with strings and 2-tuples of strings as keys
+        - model (dict with strings and 2-tuples of strings as keys
           and their empirical cond. probabilities as values), e.g.:
           {'king': 0.002987, 'forest': 0.000715,
            ('old', 'king'): 0.075675, ('dark', 'forest'): 0.15, ...}
-        - bi_wt, un_wt (floats that sum to 1), e.g.:
-          0.75, 0.25
+        - bi_wt, un_wt (floats that sum to 1), e.g.: 0.75, 0.25
     
     Returns:
-        - perplexity of model with weights on test_data (float)
+        - perplexity of model with given weights on test_data (float)
     """
     rate = 1 / sum(len(sentence) + 1 for sentence in test_data)
     cross_entropy = sum(log2(1 / itp_prob(sentence, model, bi_wt, un_wt))
